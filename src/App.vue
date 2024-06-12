@@ -1,14 +1,38 @@
 <script setup>
 import {ref} from "vue"
-const showModal =ref(true)
+const showModal =ref(false)
+const newNote=ref("")
+const notes=ref([])
+const errorMsg=ref("") //will use concept of thruthy and falsy values
+
+function getRandomColor() {
+  return "hsl(" + Math.random() * 360 + ", 100%, 75%)";
+}
+
+function addNote(){
+  if(newNote.value.length < 10){ 
+    return errorMsg.value="Text Length too short to make a Note " 
+  }
+  notes.value.push({
+    id:Math.floor(Math.random()*1000000),
+    text:newNote.value,
+    date: new Date(),
+    backgroundColor: getRandomColor()
+  })
+  showModal.value=false //this will help to close modal as soon as note is added and we can remove close button
+  newNote.value="" //to reset the value of new note text area once a new note has been added
+  errorMsg.value=""
+}
+
 </script>
 <template>
   <main>
     <div v-if="showModal" class="overlay">
       <div class="modal">
-        <textarea name="note" id="note" cols="30" rows="10"></textarea>
-        <button>Add Note</button>
-        <button class="close" @click="showModal=false">Close</button>
+        <textarea v-model.trim="newNote" name="note" id="note" cols="30" rows="10"></textarea>
+        <p v-if="errorMsg">{{ errorMsg }}</p>
+        <button @click="addNote()">Add Note</button>
+        <!-- <button class="close" @click="showModal=false">Close</button> -->
       </div>
     </div>
     <div class="container">
@@ -17,14 +41,11 @@ const showModal =ref(true)
         <button @click="showModal=true">+</button>
       </header>
       <div class="cards-container">
-        <div class="card">
-          <p class="main-text">Lorem ipsum dolor sit amet consectetur adipisicing elit. Iure exercitationem numquam voluptas iste quas. Veniam.</p>
-          <p class="date">17/04/1999</p>
+        <div v-for="note in notes" :key="note.id" class="card" :style="{backgroundColor:note.backgroundColor}">
+          <p class="main-text">{{note.text}}</p>
+          <p class="date">{{note.date.toLocaleDateString("en-US")}}</p>
         </div>
-        <div class="card">
-          <p class="main-text">Lorem ipsum dolor sit amet consectetur adipisicing elit. Iure exercitationem numquam voluptas iste quas. Veniam.</p>
-          <p class="date">17/04/1999</p>
-        </div>
+       
       </div>
     </div>
   </main>
@@ -113,5 +134,8 @@ button{
 .modal .close{
   background-color: red;
 
+}
+.modal p{
+  color: red;
 }
 </style>
